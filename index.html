@@ -1,625 +1,385 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Hầu Đồng — Âm Vang Chầu Văn</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#08020e;color:#fcefee;font:14px/1.4 system-ui,sans-serif;overflow-x:hidden}
-button{cursor:pointer;border:1px solid #ffcc00;color:#1a0500;background:linear-gradient(135deg,#ffcc00,#ff6600);border-radius:10px;padding:10px 18px;font-weight:900;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 0 15px rgba(255,204,0,0.4)}
-button:hover{filter:brightness(1.2);box-shadow:0 0 25px rgba(255,102,0,0.8);transform:translateY(-2px)}
-button:active{transform:translateY(1px) scale(.97)}
-button.red{background:linear-gradient(135deg,#d90429,#8d0801);color:#fff;border-color:#ff4d6d}
-.screen{min-height:100vh;padding:16px;background:radial-gradient(ellipse at 50% 0,#3d0c11 0,#15031c 50%,#08020e 100%)}
-.brand{text-align:center;font-size:clamp(28px,5vw,50px);font-weight:1000;color:#ffcc00;text-shadow:0 0 15px #ff6600,0 0 30px #d90429;margin-top:20px;letter-spacing:1px}
-.sub{text-align:center;color:#ffb703;margin:6px 0 24px;font-weight:600;font-size:15px}
-.authwrap{max-width:440px;margin:0 auto;background:linear-gradient(145deg,#24041b,#100215);border:2px solid #ffcc0066;border-radius:16px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,0.8)}
-input{background:#15021c;color:#fff;border:1px solid #ffcc0066;border-radius:8px;padding:12px;width:100%;margin:10px 0;outline:none;font-size:16px;text-align:center}
-input:focus{border-color:#ffcc00;box-shadow:0 0 12px rgba(255,204,0,0.5)}
-.game-container{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
-.topbar{display:flex;justify-content:space-between;align-items:center;background:#18031d;border:2px solid #ffcc0055;border-radius:14px;padding:12px 20px;box-shadow:0 0 20px rgba(255,204,0,0.2)}
-.stat{color:#ffcc00;font-weight:900;font-size:18px;text-shadow:0 0 8px rgba(255,204,0,0.5)}
-.arena-wrap{position:relative;width:100%;height:480px;background:#0d0112;border-radius:16px;border:2px solid #ffcc00;overflow:hidden;box-shadow:inset 0 0 60px rgba(0,0,0,0.9), 0 0 30px rgba(255,102,0,0.3)}
-canvas{display:block;width:100%;height:100%}
-.controls{display:flex;gap:10px;align-items:center;justify-content:center;background:#18031d;padding:14px;border-radius:14px;border:1px solid #ffcc0055}
-.notice{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#24041b;border:2px solid #ffcc00;color:#ffcc00;border-radius:12px;padding:12px 28px;z-index:99;box-shadow:0 0 25px rgba(255,204,0,0.6);font-weight:900;font-size:18px;text-align:center;pointer-events:none;animation:fadeInOut 2s forwards}
-@keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-20px)}20%{opacity:1;transform:translate(-50%,0)}80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-20px)}}
-.hidden{display:none!important}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hầu Đồng Online - Mô Phỏng</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #2c1609;
+        }
+
+        /* Container chính của Game */
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #d4a373, #fefae0, #e9edc9);
+            overflow: hidden;
+        }
+
+        /* Header phong cách Đền/Phủ */
+        .header-bar {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 100;
+        }
+
+        .header-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pill-button {
+            background: rgba(255, 248, 225, 0.9);
+            border: 2px solid #8b0000;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-weight: bold;
+            color: #8b0000;
+            font-size: 13px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pill-button.gold {
+            background: #fff8dc;
+            border-color: #d4af37;
+            color: #5c4033;
+        }
+
+        .gem-icon {
+            width: 16px;
+            height: 16px;
+            background: #2ed573;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Bản đồ Game (Isometric Canvas) */
+        #viewport {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .map-object {
+            position: absolute;
+            transform: translate(-50%, -100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: left 0.1s linear, top 0.1s linear;
+        }
+
+        /* Nhãn tên và level của nhân vật */
+        .tag-name {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #d4af37;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            margin-bottom: 4px;
+        }
+
+        .tag-name .level {
+            background: #333;
+            color: #fff;
+            border-radius: 8px;
+            padding: 0 4px;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+
+        /* Bong bóng thoại (Khấn/Lạy) */
+        .speech-bubble {
+            background: #ffffff;
+            border: 2px solid #8b0000;
+            border-radius: 12px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #8b0000;
+            position: absolute;
+            bottom: 100%;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Avatar nhân vật đơn giản bằng CSS */
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f1c40f;
+            border: 2px solid #d35400;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .avatar::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 15px;
+            background: #4a235a;
+            border-radius: 10px 10px 0 0;
+        }
+
+        /* Khu thờ / Chính điện */
+        .altar {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 120px;
+            background: linear-gradient(to bottom, #8b0000, #4a0000);
+            border: 3px solid #d4af37;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffd700;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        /* Bảng điều khiển phía dưới */
+        .controls-layer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            pointer-events: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 20px;
+        }
+
+        /* D-Pad / Joystick di chuyển */
+        .dpad {
+            width: 120px;
+            height: 120px;
+            background: rgba(235, 215, 185, 0.85);
+            border: 3px solid #b8860b;
+            border-radius: 50%;
+            position: relative;
+            pointer-events: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .dpad-btn {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            background: rgba(184, 134, 11, 0.3);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #5c4033;
+            cursor: pointer;
+        }
+
+        .dpad-btn:active { background: #b8860b; color: white; }
+        .dpad-up { top: 5px; left: 42px; }
+        .dpad-down { bottom: 5px; left: 42px; }
+        .dpad-left { left: 5px; top: 42px; }
+        .dpad-right { right: 5px; top: 42px; }
+
+        /* Cụm nút bấm hành động (Khấn / Lạy) */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+            pointer-events: auto;
+        }
+
+        .btn-action {
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-action:active { transform: scale(0.92); }
+
+        .btn-khan {
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            font-size: 15px;
+        }
+
+        .btn-lay {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #f39c12, #d35400);
+            color: white;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
 
-<!-- MÀN HÌNH ĐĂNG NHẬP -->
-<input id="loginName" placeholder="Nhập pháp danh / Tên con sến..." style="display:none">
-<section id="authScreen" class="screen">
-  <div class="brand">HẦU ĐỒNG <span>&</span> CHẦU VĂN</div>
-  <p class="sub">Thanh nhàn - Lên đồng - Phát lộc Thánh Mẫu</p>
-  <div class="authwrap">
-    <div style="font-size:50px;text-align:center;filter:drop-shadow(0 0 10px #ffcc00)">🏮 👘 🪘 🌸</div>
-    <h2 style="color:#ffcc00;text-align:center;margin:12px 0">Cung Nghênh Thanh Đồng</h2>
-    <p style="color:#e0aaff;text-align:center;font-size:13px;margin-bottom:14px">Thực hiện nghi lễ dâng khăn, tung lộc, gõ phách nhịp nhàng theo điệu Chầu Văn.</p>
-    <input id="playerName" placeholder="Nhập tên Đồng Cốt...">
-    <button style="width:100%;margin-top:10px;padding:14px;font-size:16px" onclick="startGame()">VÀO ĐIỆN HẦU</button>
-  </div>
-</section>
+    <div id="game-container">
+        <!-- Header -->
+        <div class="header-bar">
+            <div class="header-group">
+                <div class="pill-button gold">
+                    <span class="gem-icon"></span> 19
+                </div>
+                <div class="pill-button">⛩️ Quần thể Phủ Dầy</div>
+            </div>
+            <div class="header-group">
+                <div class="pill-button">🏛️ Chính Điện</div>
+                <div class="pill-button">Đổi TK</div>
+            </div>
+        </div>
 
-<!-- MÀN HÌNH GAME CHÍNH -->
-<section id="gameScreen" class="screen hidden">
-  <div class="topbar">
-    <div>
-      <b style="color:#ffcc00">Thanh Đồng: <span id="lblPlayer" style="color:#fff"></span></b>
-      <div style="font-size:12px;color:#ffb703" id="lblGia">Giá hầu: Quan Lớn Đệ Nhất</div>
+        <!-- Không gian Đền/Chính điện -->
+        <div id="viewport">
+            <div class="altar">
+                <div style="font-size: 18px; margin-bottom: 5px;">HƯƠNG ÁN CHÍNH ĐIỆN</div>
+                <div style="font-size: 12px; color: #f39c12;">[ Cung Phụng Tam Phủ Công Đồng ]</div>
+            </div>
+
+            <!-- Nhân vật người chơi -->
+            <div class="map-object" id="player" style="left: 50%; top: 70%;">
+                <div class="tag-name"><span class="level">Lv.15</span>Con Nhang Thanh Mai</div>
+                <div class="avatar"></div>
+            </div>
+        </div>
+
+        <!-- Bộ điều khiển UI -->
+        <div class="controls-layer">
+            <!-- Điều hướng D-Pad -->
+            <div class="dpad">
+                <button class="dpad-btn dpad-up" onclick="movePlayer(0, -20)">▲</button>
+                <button class="dpad-btn dpad-down" onclick="movePlayer(0, 20)">▼</button>
+                <button class="dpad-btn dpad-left" onclick="movePlayer(-20, 0)">◄</button>
+                <button class="dpad-btn dpad-right" onclick="movePlayer(20, 0)">►</button>
+            </div>
+
+            <!-- Nút hành động -->
+            <div class="action-buttons">
+                <button class="btn-action btn-lay" onclick="doAction('Lạy 🙏')">
+                    Lạy
+                </button>
+                <button class="btn-action btn-khan" onclick="doAction('Tín chủ thành tâm khấn: Đội ơn Thánh ban lộc! 🙏✨')">
+                    ⛩️<br>Khấn
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="stat">🪙 Lộc Thánh: <span id="lblLoc">1,000</span></div>
-    <button class="red" onclick="returnHome()" style="padding:6px 12px;font-size:12px">Rời điện</button>
-  </div>
 
-  <div class="arena-wrap" style="margin-top:12px">
-    <canvas id="gameCanvas"></canvas>
-  </div>
-
-  <div class="controls">
-    <button onclick="actionTungLoc()" style="background:linear-gradient(135deg,#ff0055,#7a0026);color:#fff">🌸 Tung Khăn Lộc (Space)</button>
-    <button onclick="toggleMusic()" id="btnMusic" class="gold">🪘 Bật Tiếng Trống Chầu</button>
-    <span id="hintInfo" style="margin-left:auto;color:#ffb703;font-size:13px">Dùng phím Mũi tên ◄ ► để di chuyển Đồng Cô!</span>
-  </div>
-</section>
-
-<div id="noticeContainer"></div>
-
-<script>
-let playerName = '';
-let locSt = 1000;
-let currentGiaIndex = 0;
-const GIA_LIST = [
-  { name: 'Quan Lớn Đệ Nhất (Áo Đỏ)', color: '#d90429', speed: 4, target: 5000 },
-  { name: 'Chầu Bác (Áo Xanh)', color: '#00b4d8', speed: 5, target: 15000 },
-  { name: 'Ông Hoàng Mười (Áo Vàng)', color: '#ffb703', speed: 6, target: 35000 },
-  { name: 'Cô Bé Thượng Ngàn (Áo Xanh Lục)', color: '#2ec4b6', speed: 7, target: 70000 },
-  { name: 'Cậu Bé Đuôi Cá (Áo Trắng)', color: '#ffffff', speed: 8, target: 150000 }
-];
-
-function showNotice(msg) {
-  const container = document.getElementById('noticeContainer');
-  const div = document.createElement('div');
-  div.className = 'notice';
-  div.innerText = msg;
-  container.appendChild(div);
-  setTimeout(() => div.remove(), 2000);
-}
-
-function startGame() {
-  const nameIn = document.getElementById('playerName').value.trim();
-  if(!nameIn) { alert('Xin vui lòng nhập tên Thanh Đồng!'); return; }
-  playerName = nameIn;
-  document.getElementById('lblPlayer').innerText = playerName;
-  document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('gameScreen').classList.remove('hidden');
-  initHauDongCanvas();
-}
-
-function returnHome() {
-  document.getElementById('gameScreen').classList.add('hidden');
-  document.getElementById('authScreen').classList.remove('hidden');
-  cancelAnimationFrame(animId);
-  if(isPlayingMusic) toggleMusic();
-}
-
-// --- ENGINE HẦU ĐỒNG CANVAS ---
-let canvas, ctx, animId;
-let playerX = 400, playerY = 380;
-let keys = {};
-let offerings = []; // Lộc rơi (Tiền xu, oản, trầu cau)
-let particles = [];
-let isPlayingMusic = false;
-let audioCtx = null;
-let musicTimer = null;
-
-function initHauDongCanvas() {
-  canvas = document.getElementById('gameCanvas');
-  ctx = canvas.getContext('2d');
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  window.addEventListener('keydown', e => { keys[e.code] = true; if(e.code === 'Space') actionTungLoc(); });
-  window.addEventListener('keyup', e => { keys[e.code] = false; });
-
-  canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    playerX = e.clientX - rect.left;
-  });
-
-  offerings = [];
-  particles = [];
-  playerX = canvas.width / 2;
-  playerY = canvas.height - 80;
-
-  if(animId) cancelAnimationFrame(animId);
-  loop();
-}
-
-function resizeCanvas() {
-  const wrap = canvas.parentElement;
-  canvas.width = wrap.clientWidth;
-  canvas.height = wrap.clientHeight;
-}
-
-// Web Audio API tạo tiếng trống chầu, tiếng phách
-function playDrumSound(type) {
-  if(!isPlayingMusic) return;
-  try {
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
-
-    if(type === 'trong') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(120, now);
-      osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
-      gain.gain.setValueAtTime(0.5, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-      osc.start(now);
-      osc.stop(now + 0.15);
-    } else if(type === 'phach') {
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(800, now);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
-      osc.start(now);
-      osc.stop(now + 0.05);
-    }
-  } catch(e){}
-}
-
-function toggleMusic() {
-  isPlayingMusic = !isPlayingMusic;
-  const btn = document.getElementById('btnMusic');
-  if(isPlayingMusic) {
-    btn.innerText = '🔕 Tắt Tiếng Trống';
-    btn.style.borderColor = '#00ffaa';
-    let beat = 0;
-    musicTimer = setInterval(() => {
-      if(beat % 2 === 0) playDrumSound('trong');
-      else playDrumSound('phach');
-      beat = (beat + 1) % 4;
-    }, 300);
-  } else {
-    btn.innerText = '🪘 Bật Tiếng Trống Chầu';
-    btn.style.borderColor = '#ffcc00';
-    clearInterval(musicTimer);
-  }
-}
-
-function actionTungLoc() {
-  // Tung khăn lộc hoặc múa quạt nhận lộc
-  playDrumSound('phach');
-  for(let i=0; i<12; i++) {
-    particles.push({
-      x: playerX, y: playerY - 40,
-      vx: (Math.random()-0.5)*8, vy: (Math.random()-1)*6 - 2,
-      color: ['#ffcc00', '#ff0055', '#00ffaa', '#ffffff'][Math.floor(Math.random()*4)],
-      size: Math.random()*5+3, alpha: 1, life: 0.03
-    });
-  }
-
-  // Kiểm tra bắt lộc
-  offerings.forEach((o, idx) => {
-    const dist = Math.hypot(playerX - o.x, playerY - o.y);
-    if(dist < 70) {
-      locSt += o.val;
-      showNotice(`Nhận được +${o.val} Lộc Thánh! 🪙`);
-      offerings.splice(idx, 1);
-      checkUpgrade();
-    }
-  });
-}
-
-function checkUpgrade() {
-  const currentGia = GIA_LIST[currentGiaIndex];
-  if(locSt >= currentGia.target && currentGiaIndex < GIA_LIST.length - 1) {
-    currentGiaIndex++;
-    showNotice(`🎉 THĂNG GIÁ HẦU: ${GIA_LIST[currentGiaIndex].name}!`);
-    document.getElementById('lblGia').innerText = `Giá hầu: ${GIA_LIST[currentGiaIndex].name}`;
-  }
-}
-
-function loop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 1. Vẽ không gian Đền Điện tâm linh (đèn lồng, ban thờ lung linh)
-  ctx.save();
-  ctx.strokeStyle = 'rgba(255, 204, 0, 0.15)';
-  ctx.lineWidth = 1;
-  for(let i=0; i<canvas.width; i+=40) {
-    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
-  }
-  ctx.restore();
-
-  // Điều khiển bàn phím di chuyển
-  const currentGia = GIA_LIST[currentGiaIndex];
-  if(keys['ArrowLeft'] || keys['KeyA']) playerX -= currentGia.speed;
-  if(keys['ArrowRight'] || keys['KeyD']) playerX += currentGia.speed;
-  playerX = Math.max(40, Math.min(canvas.width - 40, playerX));
-
-  // Sinh vật phẩm lộc rơi (Tiền xu, oản, trầu cau)
-  if(Math.random() < 0.04) {
-    offerings.push({
-      x: Math.random() * (canvas.width - 60) + 30,
-      y: -20,
-      vy: Math.random() * 1.5 + 1.2,
-      val: [500, 1000, 2000, 5000][Math.floor(Math.random()*4)],
-      icon: ['🪙', '🥮', '🌿', '🧧'][Math.floor(Math.random()*4)]
-    });
-  }
-
-  // Cập nhật và vẽ lộc rơi
-  offerings.forEach((o, idx) => {
-    o.y += o.vy;
-    ctx.font = '24px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(o.icon, o.x, o.y);
-
-    if(o.y > canvas.height + 30) {
-      offerings.splice(idx, 1);
-    }
-  });
-
-  // 2. Vẽ Nhân Vật Thanh Đồng (Đang múa hầu đồng)
-  ctx.save();
-  ctx.translate(playerX, playerY);
-
-  // Hiệu ứng hào quang phát sáng theo giá hầu
-  ctx.shadowBlur = 20;
-  ctx.shadowColor = currentGia.color;
-
-  // Thân áo Thanh Đồng
-  ctx.fillStyle = currentGia.color;
-  ctx.beginPath();
-  ctx.arc(0, -30, 22, 0, Math.PI*2);
-  ctx.fill();
-
-  // Khăn chầu / Áo choàng uốn lượn theo nhịp điệu
-  const wave = Math.sin(Date.now() * 0.01) * 12;
-  ctx.fillStyle = '#ffcc00';
-  ctx.fillRect(-28 + wave/2, -15, 56, 45);
-
-  // Khăn đỏ phủ diện (hoặc mặt thanh đồng)
-  ctx.fillStyle = '#ff3366';
-  ctx.fillRect(-12, -45, 24, 16);
-
-  ctx.restore();
-
-  // 3. Cập nhật Particle hiệu ứng tung khăn lộc
-  particles.forEach((p, idx) => {
-    p.x += p.vx; p.y += p.vy; p.alpha -= p.life;
-    ctx.globalAlpha = Math.max(0, p.alpha);
-    ctx.fillStyle = p.color;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-    if(p.alpha <= 0) particles.splice(idx, 1);
-  });
-  ctx.globalAlpha = 1;
-
-  // Cập nhật giao diện tiền lộc
-  document.getElementById('lblLoc').innerText = locSt.toLocaleString();
-
-  animId = requestAnimationFrame(loop);
-}
-</script>
-</body>
-</html><!doctype html>
-<html lang="vi">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Hầu Đồng — Âm Vang Chầu Văn</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#08020e;color:#fcefee;font:14px/1.4 system-ui,sans-serif;overflow-x:hidden}
-button{cursor:pointer;border:1px solid #ffcc00;color:#1a0500;background:linear-gradient(135deg,#ffcc00,#ff6600);border-radius:10px;padding:10px 18px;font-weight:900;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 0 15px rgba(255,204,0,0.4)}
-button:hover{filter:brightness(1.2);box-shadow:0 0 25px rgba(255,102,0,0.8);transform:translateY(-2px)}
-button:active{transform:translateY(1px) scale(.97)}
-button.red{background:linear-gradient(135deg,#d90429,#8d0801);color:#fff;border-color:#ff4d6d}
-.screen{min-height:100vh;padding:16px;background:radial-gradient(ellipse at 50% 0,#3d0c11 0,#15031c 50%,#08020e 100%)}
-.brand{text-align:center;font-size:clamp(28px,5vw,50px);font-weight:1000;color:#ffcc00;text-shadow:0 0 15px #ff6600,0 0 30px #d90429;margin-top:20px;letter-spacing:1px}
-.sub{text-align:center;color:#ffb703;margin:6px 0 24px;font-weight:600;font-size:15px}
-.authwrap{max-width:440px;margin:0 auto;background:linear-gradient(145deg,#24041b,#100215);border:2px solid #ffcc0066;border-radius:16px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,0.8)}
-input{background:#15021c;color:#fff;border:1px solid #ffcc0066;border-radius:8px;padding:12px;width:100%;margin:10px 0;outline:none;font-size:16px;text-align:center}
-input:focus{border-color:#ffcc00;box-shadow:0 0 12px rgba(255,204,0,0.5)}
-.game-container{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
-.topbar{display:flex;justify-content:space-between;align-items:center;background:#18031d;border:2px solid #ffcc0055;border-radius:14px;padding:12px 20px;box-shadow:0 0 20px rgba(255,204,0,0.2)}
-.stat{color:#ffcc00;font-weight:900;font-size:18px;text-shadow:0 0 8px rgba(255,204,0,0.5)}
-.arena-wrap{position:relative;width:100%;height:480px;background:#0d0112;border-radius:16px;border:2px solid #ffcc00;overflow:hidden;box-shadow:inset 0 0 60px rgba(0,0,0,0.9), 0 0 30px rgba(255,102,0,0.3)}
-canvas{display:block;width:100%;height:100%}
-.controls{display:flex;gap:10px;align-items:center;justify-content:center;background:#18031d;padding:14px;border-radius:14px;border:1px solid #ffcc0055}
-.notice{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#24041b;border:2px solid #ffcc00;color:#ffcc00;border-radius:12px;padding:12px 28px;z-index:99;box-shadow:0 0 25px rgba(255,204,0,0.6);font-weight:900;font-size:18px;text-align:center;pointer-events:none;animation:fadeInOut 2s forwards}
-@keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-20px)}20%{opacity:1;transform:translate(-50%,0)}80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-20px)}}
-.hidden{display:none!important}
-</style>
-</head>
-<body>
-
-<!-- MÀN HÌNH ĐĂNG NHẬP -->
-<input id="loginName" placeholder="Nhập pháp danh / Tên con sến..." style="display:none">
-<section id="authScreen" class="screen">
-  <div class="brand">HẦU ĐỒNG <span>&</span> CHẦU VĂN</div>
-  <p class="sub">Thanh nhàn - Lên đồng - Phát lộc Thánh Mẫu</p>
-  <div class="authwrap">
-    <div style="font-size:50px;text-align:center;filter:drop-shadow(0 0 10px #ffcc00)">🏮 👘 🪘 🌸</div>
-    <h2 style="color:#ffcc00;text-align:center;margin:12px 0">Cung Nghênh Thanh Đồng</h2>
-    <p style="color:#e0aaff;text-align:center;font-size:13px;margin-bottom:14px">Thực hiện nghi lễ dâng khăn, tung lộc, gõ phách nhịp nhàng theo điệu Chầu Văn.</p>
-    <input id="playerName" placeholder="Nhập tên Đồng Cốt...">
-    <button style="width:100%;margin-top:10px;padding:14px;font-size:16px" onclick="startGame()">VÀO ĐIỆN HẦU</button>
-  </div>
-</section>
-
-<!-- MÀN HÌNH GAME CHÍNH -->
-<section id="gameScreen" class="screen hidden">
-  <div class="topbar">
-    <div>
-      <b style="color:#ffcc00">Thanh Đồng: <span id="lblPlayer" style="color:#fff"></span></b>
-      <div style="font-size:12px;color:#ffb703" id="lblGia">Giá hầu: Quan Lớn Đệ Nhất</div>
-    </div>
-    <div class="stat">🪙 Lộc Thánh: <span id="lblLoc">1,000</span></div>
-    <button class="red" onclick="returnHome()" style="padding:6px 12px;font-size:12px">Rời điện</button>
-  </div>
-
-  <div class="arena-wrap" style="margin-top:12px">
-    <canvas id="gameCanvas"></canvas>
-  </div>
-
-  <div class="controls">
-    <button onclick="actionTungLoc()" style="background:linear-gradient(135deg,#ff0055,#7a0026);color:#fff">🌸 Tung Khăn Lộc (Space)</button>
-    <button onclick="toggleMusic()" id="btnMusic" class="gold">🪘 Bật Tiếng Trống Chầu</button>
-    <span id="hintInfo" style="margin-left:auto;color:#ffb703;font-size:13px">Dùng phím Mũi tên ◄ ► để di chuyển Đồng Cô!</span>
-  </div>
-</section>
-
-<div id="noticeContainer"></div>
-
-<script>
-let playerName = '';
-let locSt = 1000;
-let currentGiaIndex = 0;
-const GIA_LIST = [
-  { name: 'Quan Lớn Đệ Nhất (Áo Đỏ)', color: '#d90429', speed: 4, target: 5000 },
-  { name: 'Chầu Bác (Áo Xanh)', color: '#00b4d8', speed: 5, target: 15000 },
-  { name: 'Ông Hoàng Mười (Áo Vàng)', color: '#ffb703', speed: 6, target: 35000 },
-  { name: 'Cô Bé Thượng Ngàn (Áo Xanh Lục)', color: '#2ec4b6', speed: 7, target: 70000 },
-  { name: 'Cậu Bé Đuôi Cá (Áo Trắng)', color: '#ffffff', speed: 8, target: 150000 }
-];
-
-function showNotice(msg) {
-  const container = document.getElementById('noticeContainer');
-  const div = document.createElement('div');
-  div.className = 'notice';
-  div.innerText = msg;
-  container.appendChild(div);
-  setTimeout(() => div.remove(), 2000);
-}
-
-function startGame() {
-  const nameIn = document.getElementById('playerName').value.trim();
-  if(!nameIn) { alert('Xin vui lòng nhập tên Thanh Đồng!'); return; }
-  playerName = nameIn;
-  document.getElementById('lblPlayer').innerText = playerName;
-  document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('gameScreen').classList.remove('hidden');
-  initHauDongCanvas();
-}
-
-function returnHome() {
-  document.getElementById('gameScreen').classList.add('hidden');
-  document.getElementById('authScreen').classList.remove('hidden');
-  cancelAnimationFrame(animId);
-  if(isPlayingMusic) toggleMusic();
-}
-
-// --- ENGINE HẦU ĐỒNG CANVAS ---
-let canvas, ctx, animId;
-let playerX = 400, playerY = 380;
-let keys = {};
-let offerings = []; // Lộc rơi (Tiền xu, oản, trầu cau)
-let particles = [];
-let isPlayingMusic = false;
-let audioCtx = null;
-let musicTimer = null;
-
-function initHauDongCanvas() {
-  canvas = document.getElementById('gameCanvas');
-  ctx = canvas.getContext('2d');
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  window.addEventListener('keydown', e => { keys[e.code] = true; if(e.code === 'Space') actionTungLoc(); });
-  window.addEventListener('keyup', e => { keys[e.code] = false; });
-
-  canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    playerX = e.clientX - rect.left;
-  });
-
-  offerings = [];
-  particles = [];
-  playerX = canvas.width / 2;
-  playerY = canvas.height - 80;
-
-  if(animId) cancelAnimationFrame(animId);
-  loop();
-}
-
-function resizeCanvas() {
-  const wrap = canvas.parentElement;
-  canvas.width = wrap.clientWidth;
-  canvas.height = wrap.clientHeight;
-}
-
-// Web Audio API tạo tiếng trống chầu, tiếng phách
-function playDrumSound(type) {
-  if(!isPlayingMusic) return;
-  try {
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
-
-    if(type === 'trong') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(120, now);
-      osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
-      gain.gain.setValueAtTime(0.5, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-      osc.start(now);
-      osc.stop(now + 0.15);
-    } else if(type === 'phach') {
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(800, now);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
-      osc.start(now);
-      osc.stop(now + 0.05);
-    }
-  } catch(e){}
-}
-
-function toggleMusic() {
-  isPlayingMusic = !isPlayingMusic;
-  const btn = document.getElementById('btnMusic');
-  if(isPlayingMusic) {
-    btn.innerText = '🔕 Tắt Tiếng Trống';
-    btn.style.borderColor = '#00ffaa';
-    let beat = 0;
-    musicTimer = setInterval(() => {
-      if(beat % 2 === 0) playDrumSound('trong');
-      else playDrumSound('phach');
-      beat = (beat + 1) % 4;
-    }, 300);
-  } else {
-    btn.innerText = '🪘 Bật Tiếng Trống Chầu';
-    btn.style.borderColor = '#ffcc00';
-    clearInterval(musicTimer);
-  }
-}
-
-function actionTungLoc() {
-  // Tung khăn lộc hoặc múa quạt nhận lộc
-  playDrumSound('phach');
-  for(let i=0; i<12; i++) {
-    particles.push({
-      x: playerX, y: playerY - 40,
-      vx: (Math.random()-0.5)*8, vy: (Math.random()-1)*6 - 2,
-      color: ['#ffcc00', '#ff0055', '#00ffaa', '#ffffff'][Math.floor(Math.random()*4)],
-      size: Math.random()*5+3, alpha: 1, life: 0.03
-    });
-  }
-
-  // Kiểm tra bắt lộc
-  offerings.forEach((o, idx) => {
-    const dist = Math.hypot(playerX - o.x, playerY - o.y);
-    if(dist < 70) {
-      locSt += o.val;
-      showNotice(`Nhận được +${o.val} Lộc Thánh! 🪙`);
-      offerings.splice(idx, 1);
-      checkUpgrade();
-    }
-  });
-}
-
-function checkUpgrade() {
-  const currentGia = GIA_LIST[currentGiaIndex];
-  if(locSt >= currentGia.target && currentGiaIndex < GIA_LIST.length - 1) {
-    currentGiaIndex++;
-    showNotice(`🎉 THĂNG GIÁ HẦU: ${GIA_LIST[currentGiaIndex].name}!`);
-    document.getElementById('lblGia').innerText = `Giá hầu: ${GIA_LIST[currentGiaIndex].name}`;
-  }
-}
-
-function loop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 1. Vẽ không gian Đền Điện tâm linh (đèn lồng, ban thờ lung linh)
-  ctx.save();
-  ctx.strokeStyle = 'rgba(255, 204, 0, 0.15)';
-  ctx.lineWidth = 1;
-  for(let i=0; i<canvas.width; i+=40) {
-    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
-  }
-  ctx.restore();
-
-  // Điều khiển bàn phím di chuyển
-  const currentGia = GIA_LIST[currentGiaIndex];
-  if(keys['ArrowLeft'] || keys['KeyA']) playerX -= currentGia.speed;
-  if(keys['ArrowRight'] || keys['KeyD']) playerX += currentGia.speed;
-  playerX = Math.max(40, Math.min(canvas.width - 40, playerX));
-
-  // Sinh vật phẩm lộc rơi (Tiền xu, oản, trầu cau)
-  if(Math.random() < 0.04) {
-    offerings.push({
-      x: Math.random() * (canvas.width - 60) + 30,
-      y: -20,
-      vy: Math.random() * 1.5 + 1.2,
-      val: [500, 1000, 2000, 5000][Math.floor(Math.random()*4)],
-      icon: ['🪙', '🥮', '🌿', '🧧'][Math.floor(Math.random()*4)]
-    });
-  }
-
-  // Cập nhật và vẽ lộc rơi
-  offerings.forEach((o, idx) => {
-    o.y += o.vy;
-    ctx.font = '24px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(o.icon, o.x, o.y);
-
-    if(o.y > canvas.height + 30) {
-      offerings.splice(idx, 1);
-    }
-  });
-
-  // 2. Vẽ Nhân Vật Thanh Đồng (Đang múa hầu đồng)
-  ctx.save();
-  ctx.translate(playerX, playerY);
-
-  // Hiệu ứng hào quang phát sáng theo giá hầu
-  ctx.shadowBlur = 20;
-  ctx.shadowColor = currentGia.color;
-
-  // Thân áo Thanh Đồng
-  ctx.fillStyle = currentGia.color;
-  ctx.beginPath();
-  ctx.arc(0, -30, 22, 0, Math.PI*2);
-  ctx.fill();
-
-  // Khăn chầu / Áo choàng uốn lượn theo nhịp điệu
-  const wave = Math.sin(Date.now() * 0.01) * 12;
-  ctx.fillStyle = '#ffcc00';
-  ctx.fillRect(-28 + wave/2, -15, 56, 45);
-
-  // Khăn đỏ phủ diện (hoặc mặt thanh đồng)
-  ctx.fillStyle = '#ff3366';
-  ctx.fillRect(-12, -45, 24, 16);
-
-  ctx.restore();
-
-  // 3. Cập nhật Particle hiệu ứng tung khăn lộc
-  particles.forEach((p, idx) => {
-    p.x += p.vx; p.y += p.vy; p.alpha -= p.life;
-    ctx.globalAlpha = Math.max(0, p.alpha);
-    ctx.fillStyle = p.color;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-    if(p.alpha <= 0) particles.splice(idx, 1);
-  });
-  ctx.globalAlpha = 1;
-
-  // Cập nhật giao diện tiền lộc
-  document.getElementById('lblLoc').innerText = locSt.toLocaleString();
-
-  animId = requestAnimationFrame(loop);
-}
-</script>
+    <script>
+        const player = document.getElementById('player');
+        let posX = window.innerWidth / 2;
+        let posY = window.innerHeight * 0.7;
+
+        // Cập nhật vị trí ban đầu
+        updatePosition();
+
+        function movePlayer(dx, dy) {
+            const minX = 40;
+            const maxX = window.innerWidth - 40;
+            const minY = window.innerHeight * 0.35;
+            const maxY = window.innerHeight - 80;
+
+            posX = Math.min(Math.max(posX + dx, minX), maxX);
+            posY = Math.min(Math.max(posY + dy, minY), maxY);
+
+            updatePosition();
+        }
+
+        function updatePosition() {
+            player.style.left = posX + 'px';
+            player.style.top = posY + 'px';
+        }
+
+        // Tạo lời thoại khi bấm Khấn / Lạy
+        function doAction(text) {
+            // Xóa lời thoại cũ nếu có
+            const oldBubble = player.querySelector('.speech-bubble');
+            if (oldBubble) oldBubble.remove();
+
+            // Tạo lời thoại mới
+            const bubble = document.createElement('div');
+            bubble.className = 'speech-bubble';
+            bubble.innerText = text;
+            
+            player.appendChild(bubble);
+
+            // Tự biến mất sau 3 giây
+            setTimeout(() => {
+                if (bubble.parentNode) {
+                    bubble.remove();
+                }
+            }, 3000);
+        }
+
+        // Bắt sự kiện phím mũi tên trên bàn phím máy tính
+        window.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp': case 'w': movePlayer(0, -15); break;
+                case 'ArrowDown': case 's': movePlayer(0, 15); break;
+                case 'ArrowLeft': case 'a': movePlayer(-15, 0); break;
+                case 'ArrowRight': case 'd': movePlayer(15, 0); break;
+                case ' ': doAction('Tín chủ thành tâm khấn: Đội ơn Thánh ban lộc! 🙏✨'); break;
+            }
+        });
+    </script>
 </body>
 </html>
